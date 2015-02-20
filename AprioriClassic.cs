@@ -10,36 +10,42 @@ namespace Apriori
     /// </summary>
     class AprioriClassic
     {
-        Dictionary<string[], string> Regulations = new Dictionary<string[], string>();      //储存对规则的处理<List<数值>,结果>
-        //频繁项字典 经过Sup和Conf筛选的K-候选项集
-        private Dictionary<List<string>, Dictionary<string, int>> FrequentItems = new Dictionary<List<string>, Dictionary<string, int>>();
+        //原始数据
+        private List<List<string>> RawData = new List<List<string>>();
         //K-候选项集 格式：<频繁项，<结果，结果中计数>>
         private Dictionary<List<string>, Dictionary<string, int>> K_Items = new Dictionary<List<string>, Dictionary<string, int>>();
-        private List<List<string>> RawData = new List<List<string>>();           //原始数据
-        private int itemLength;                                                   //字段数
+        //频繁项字典 经过Sup和Conf筛选的K-候选项集
+        private Dictionary<List<string>, Dictionary<string, int>> FrequentItems = new Dictionary<List<string>, Dictionary<string, int>>();
+        //储存对规则的处理<List<数值>,结果>
+        Dictionary<string[], string> Regulations = new Dictionary<string[], string>();
+        //字段数
+        private int itemLength;                                                 //字段数
 
         public float MinSupport{get;set;}                                              //最小支持度
         public float MinConfidence{get;set;}                                          //最小置信度
 
+        public int RegNum { get { return Regulations.Count; } }
         public AprioriClassic(float minSup, float minConf)
         {
             MinSupport = minSup;
             MinConfidence = minConf;
+        }
+
+        public AprioriClassic(float minSup, float minConf, string trainDataUri)
+        {
+            LoadData(trainDataUri);
+            MinSupport = minSup;
+            MinConfidence = minConf;
+            this.Train();
         }
         #region ===============>训练Func
         /// <summary>
         /// Apriori训练
         /// </summary>
         /// <returns></returns>
-        public void Train(string trainDataUri)
+        public void Train()
         {
-            //Console.WriteLine("--------Training----------");
-
-            //Console.WriteLine("minSup:{0}  minConf:{1}", minSup, minConf);
-
-            LoadData(trainDataUri);
-
-            #region 添加1-候选项集
+            #region ------>添加1-候选项集
             foreach (List<string> thing in RawData)
             {
                 for (int i = 0; i < itemLength; i++)
@@ -68,10 +74,8 @@ namespace Apriori
             while (K_Items.Count > 1)
             {
                 K_count++;
-                // Console.Write("{0}--正在产生{1}频繁项集.", DateTime.Now, K_count);
 
                 #region 在每条源数据中查找候选项
-                //Console.Write(".");
                 foreach (List<string> item in K_Items.Keys)
                 {
                     for (int i = 0; i < RawData.Count; i++)
@@ -104,7 +108,6 @@ namespace Apriori
                 #endregion
 
                 #region 根据MinSup筛选
-                // Console.Write(".");
                 List<List<string>> deleteItem = new List<List<string>>();
                 foreach (KeyValuePair<List<string>, Dictionary<string, int>> item in K_Items)
                 {
@@ -121,7 +124,6 @@ namespace Apriori
                 #endregion
 
                 #region 将K频繁项添加到频繁项集中
-                //Console.Write(".");
                 foreach (KeyValuePair<List<string>, Dictionary<string, int>> item in K_Items)
                 {
                     FrequentItems.Add(item.Key, item.Value);
@@ -129,7 +131,6 @@ namespace Apriori
                 #endregion
 
                 #region 产生K+1项
-                //Console.Write(".");
                 List<List<string>> OldItems = K_Items.Keys.ToList();
                 List<List<string>> NewItems = new List<List<string>>();
                 for (int i = 0; i < OldItems.Count; i++)
@@ -187,28 +188,18 @@ namespace Apriori
                 #endregion
 
                 #region 产生新的候选字典
-                //Console.Write(".");
                 K_Items.Clear();
                 foreach (List<string> item in NewItems)
                 {
                     K_Items.Add(item, new Dictionary<string, int>());
                 }
-                //Console.Write("Complited.\n");
                 #endregion
             }
             #endregion
 
             #region 计算置信度 输出关联规则
-            //Console.WriteLine("{0}--根据置信度生成关联规则", DateTime.Now);
-           // List<string> Regulations = new List<string>();      //存放返回的规则库
             foreach (KeyValuePair<List<string>, Dictionary<string, int>> item in FrequentItems)
             {
-               /* string regular = "";
-                foreach (string num in item.Key)
-                {
-                    regular = regular + num.ToString() + ",";
-                }
-                regular = regular.Remove(regular.Length - 1, 1);*/
                 float totalCount = 0;
                 foreach (KeyValuePair<string, int> sitem in item.Value)
                 {
@@ -221,39 +212,11 @@ namespace Apriori
                     {
                         string[] items = item.Key.ToArray();
                         Regulations.Add(items, sitem.Key);
-                        //string temp = regular + "|" + sitem.Key;         //规则格式："规则项|规则结果"
-                        //Regulations.Add(temp);
-
-                        /*      消除重复的规则项
-                        bool exist = false;
-                        foreach (string  reg in Regulations)
-                        {
-                            if (reg == temp)
-                            {
-                                exist = true;
-                                break;
-                            }
-                        }
-                        if (!exist)
-                        {
-                            Regulations.Add(temp);
-                        }
-                         * */
+                        //todo:消去重复的规则
                     }
                 }
             }
             #endregion
-            /*
-             #region  输出规则库
-            List<string> Regulations = new List<string>();
-            foreach (KeyValuePair<List<double>,Dictionary<string,int>> item in FrequentItems )
-            {
-                string regulation = item.Key
-            }
-            #endregion
-            */
-            Console.WriteLine("Regulations Trained：{0}", Regulations.Count);
-            //return new List<string>() ;
         }
         #endregion
        
@@ -266,30 +229,13 @@ namespace Apriori
         /// <param name="fileUrl">测试训练集文件</param>
         public void Test(string fileUrl)
         {
-            //Console.WriteLine("-----------testing------------");
-
-            //#region 对string规则的处理
-           
-            //foreach (string item in Source)                                                             //对string规则的处理
-            //{
-            //    string[] temps = item.Split(new char[] { '|' });
-            //    string[] numbTemp = temps[0].Split(new char[] { ',' });
-            //    List<string> numbs = new List<string>();
-            //    foreach (string numb in numbTemp)
-            //    {
-            //        numbs.Add(Convert.ToString(numb));
-            //    }
-            //    Regulations.Add(numbs, temps[1]);
-            //}
-            //#endregion
-
             int testTime = 0;       //判断次数
             int success = 0;        //成功次数
-
 
             StreamReader FileLoader = new StreamReader(fileUrl);    //读取器
             while (true)
             {
+
                 #region ----------->读取&计数
                 string currentLine = FileLoader.ReadLine();         //读取行，若为空结束，否则计数器++
                 if (currentLine == null)
@@ -345,17 +291,10 @@ namespace Apriori
 
                 #region 与当前行的最后一项（正确结果）对比，成功则success++
                 string[] currentLines = currentLine.Split(',');
-                //Console.WriteLine("规则库判断：{0}正确结果：{1}", max.Key, currentLines[currentLines.Length - 1]);
                 if (max.Key == currentLines[currentLines.Length - 1])
                 {
                     success++;
-                    // Console.Write("-------success\n");
                 }
-                else
-                {
-                    //Console.Write("-------failed\n");
-                }
-                // Console.ReadKey();
                 #endregion
             }
             Console.ForegroundColor = ConsoleColor.Red;
