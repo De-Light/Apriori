@@ -20,11 +20,12 @@ namespace Apriori
         Dictionary<string[], string> Regulations = new Dictionary<string[], string>();
         //字段数
         private int itemLength;                                                 //字段数
+        //上次训练时间
+        private DateTime lastTrain = DateTime.Now;
 
         public float MinSupport{get;set;}                                              //最小支持度
         public float MinConfidence{get;set;}                                          //最小置信度
-
-        public int RegNum { get { return Regulations.Count; } }
+        public int regulationNum { get { return Regulations.Count; } }
         public AprioriClassic(float minSup, float minConf)
         {
             MinSupport = minSup;
@@ -219,91 +220,63 @@ namespace Apriori
             #endregion
         }
         #endregion
-       
+
 
         #region ============>测试Func
         /// <summary>
-        /// 测试Func
+        /// 
         /// </summary>
-        /// <param name="Source">规则库</param>
-        /// <param name="fileUrl">测试训练集文件</param>
-        public void Test(string fileUrl)
+        /// <param name="testData">要测试的数据</param>
+        /// <returns>测试结果</returns>
+        public string Test(string testData)
         {
-            int testTime = 0;       //判断次数
-            int success = 0;        //成功次数
+            string currentLine = testData;
 
-            StreamReader FileLoader = new StreamReader(fileUrl);    //读取器
-            while (true)
+            #region 判断块
+            Dictionary<string, double> testNote = new Dictionary<string, double>();        //用来记录规则判断的结果
+            foreach (KeyValuePair<string[], string> regs in Regulations)          //读取行后，开始与每一条数据进行比对
             {
-
-                #region ----------->读取&计数
-                string currentLine = FileLoader.ReadLine();         //读取行，若为空结束，否则计数器++
-                if (currentLine == null)
+                int weight = 0;                                                      //权值，为规则项数
+                bool isContain = true;
+                foreach (string num in regs.Key)                                     //判断是否存在当前规则
                 {
-                    break;
-                }
-                testTime++;
-                #endregion
-
-                #region 判断块
-                Dictionary<string, double> testNote = new Dictionary<string, double>();        //用来记录规则判断的结果
-                foreach (KeyValuePair<string[], string> regs in Regulations)          //读取行后，开始与每一条数据进行比对
-                {
-                    int weight = 0;                                                      //权值，为规则项数
-                    bool isContain = true;
-                    foreach (string num in regs.Key)                                     //判断是否存在当前规则
+                    if (!currentLine.Contains(num.ToString()))
                     {
-                        if (!currentLine.Contains(num.ToString()))
-                        {
-                            isContain = false;
-                            break;
-                        }
-                        else
-                        {
-                            weight++;
-                        }
+                        isContain = false;
+                        break;
                     }
-                    if (isContain)                                                      //若存在，将规则指向的结果存入结果记录器中
+                    else
                     {
-                        if (testNote.Keys.Contains(regs.Value))
-                        {
-                            double count = testNote[regs.Value];
-                            testNote[regs.Value] = count + weight * Math.Log(weight, 2) + weight;       //权值计算：（遍历规则库）权值+=该条规则的项数+Log（项数）
-                        }
-                        else
-                        {
-                            testNote.Add(regs.Value, 1);
-                        }
+                        weight++;
                     }
                 }
-                #endregion
-
-                #region 整理结果记录，将最大值取出
-                KeyValuePair<string, double> max = new KeyValuePair<string, double>(" ", 0);
-                foreach (KeyValuePair<string, double> item in testNote)
+                if (isContain)                                                      //若存在，将规则指向的结果存入结果记录器中
                 {
-                    if (max.Value < item.Value)
+                    if (testNote.Keys.Contains(regs.Value))
                     {
-                        max = item;
+                        double count = testNote[regs.Value];
+                        testNote[regs.Value] = count + weight * Math.Log(weight, 2) + weight;       //权值计算：（遍历规则库）权值+=该条规则的项数+Log（项数）
+                    }
+                    else
+                    {
+                        testNote.Add(regs.Value, 1);
                     }
                 }
-                #endregion
-
-                #region 与当前行的最后一项（正确结果）对比，成功则success++
-                string[] currentLines = currentLine.Split(',');
-                if (max.Key == currentLines[currentLines.Length - 1])
-                {
-                    success++;
-                }
-                #endregion
             }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("success percentage:{0,5}%", (success * 100f / testTime * 1f));
-            Console.ForegroundColor = ConsoleColor.White;
-        }
+            #endregion
+            #region 整理结果记录，将最大值取出
+            KeyValuePair<string, double> max = new KeyValuePair<string, double>(" ", 0);
+            foreach (KeyValuePair<string, double> item in testNote)
+            {
+                if (max.Value < item.Value)
+                {
+                    max = item;
+                }
+            }
+            #endregion
+            return max.Key;
         #endregion
-
-
+        }
         public void LoadData(string url)
         {
             //Console.WriteLine("-----------Loading Data----------");
