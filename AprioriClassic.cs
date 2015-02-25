@@ -212,15 +212,48 @@ namespace Apriori
                     if (conf > MinConfidence)
                     {
                         string[] items = item.Key.ToArray();
+                        //if(!CheckRegulationExist(items, sitem.Key))
+                        //{
+                        //    Regulations.Add(items, sitem.Key);
+                        //}
                         Regulations.Add(items, sitem.Key);
-                        //todo:消去重复的规则
                     }
                 }
             }
             #endregion
         }
         #endregion
-
+        public bool CheckRegulationExist(string[] items,string key)
+        {
+            int itemsCount = items.Length;
+            
+            foreach (KeyValuePair<string[],string> item in Regulations)
+            {
+                bool isExist = true;
+                if (item.Key.Length!=itemsCount || key!=item.Value)
+                {
+                    continue;
+                }
+                bool isDifferent = false;
+                for (int i = 0; i < itemsCount; i++)
+                {
+                    if (item.Key[i]!=items[i])
+                    {
+                        isDifferent = true;
+                    }
+                    if (isDifferent)
+                    {
+                        isExist = false;
+                        break;
+                    }
+                }
+                if (isExist)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         #region ============>测试Func
         /// <summary>
