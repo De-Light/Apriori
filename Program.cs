@@ -13,8 +13,10 @@ namespace Apriori
             string dataSet = "iris";//数据集名称
             char[] ABCDE = { 'A', 'B', 'C', 'D', 'E' };//五组数据集
             Console.WriteLine("DATASET:{0}", dataSet);
-            AprioriClassic aprioriTest = new AprioriClassic((float)0.01, (float)0.1);//在这里修改minSup和minConf
-
+            float minSup = 0.01f;
+            float minConf = 0.1f;
+            AprioriClassic aprioriTest = new AprioriClassic(minSup, minConf);//在这里修改minSup和minConf
+            Console.WriteLine("MinSup:{0}\tMinConf:{1}",minSup,minConf);
             foreach (char letter in ABCDE)
             {
                 DateTime start = DateTime.Now;

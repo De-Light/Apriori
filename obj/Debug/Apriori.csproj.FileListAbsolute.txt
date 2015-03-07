@@ -10,3 +10,9 @@ D:\Temp File\信息安全大赛\Apriori\Apriori\obj\Debug\Apriori.pdb
 D:\Temp File\信息安全大赛\Apriori\Apriori\bin\Debug\Apriori.exe
 D:\Temp File\信息安全大赛\Apriori\Apriori\bin\Debug\Apriori.pdb
 D:\Temp File\信息安全大赛\Apriori\Apriori\obj\Debug\Apriori.csprojResolveAssemblyReference.cache
+D:\CSharp\Apriori\Apriori\bin\Debug\Apriori.exe.config
+D:\CSharp\Apriori\Apriori\obj\Debug\Apriori.exe
+D:\CSharp\Apriori\Apriori\obj\Debug\Apriori.pdb
+D:\CSharp\Apriori\Apriori\bin\Debug\Apriori.exe
+D:\CSharp\Apriori\Apriori\bin\Debug\Apriori.pdb
+D:\CSharp\Apriori\Apriori\obj\Debug\Apriori.csprojResolveAssemblyReference.cache

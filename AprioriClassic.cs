@@ -19,12 +19,12 @@ namespace Apriori
         //储存对规则的处理<List<数值>,结果>
         Dictionary<string[], string> Regulations = new Dictionary<string[], string>();
         //字段数
-        private int itemLength;                                                 //字段数
+        private int itemLength;
         //上次训练时间
         private DateTime lastTrain = DateTime.Now;
 
-        public float MinSupport{get;set;}                                              //最小支持度
-        public float MinConfidence{get;set;}                                          //最小置信度
+        public float MinSupport { get; set; }                                              //最小支持度
+        public float MinConfidence { get; set; }                                          //最小置信度
         public int regulationNum { get { return Regulations.Count; } }
         public AprioriClassic(float minSup, float minConf)
         {
@@ -113,7 +113,7 @@ namespace Apriori
                 foreach (KeyValuePair<List<string>, Dictionary<string, int>> item in K_Items)
                 {
                     int count = item.Value.Values.ToArray().Sum();
-                    if (count < MinSupport*RawData.Count)
+                    if (count < MinSupport * RawData.Count)
                     {
                         deleteItem.Add(item.Key);
                     }
@@ -212,10 +212,6 @@ namespace Apriori
                     if (conf > MinConfidence)
                     {
                         string[] items = item.Key.ToArray();
-                        //if(!CheckRegulationExist(items, sitem.Key))
-                        //{
-                        //    Regulations.Add(items, sitem.Key);
-                        //}
                         Regulations.Add(items, sitem.Key);
                     }
                 }
@@ -223,41 +219,10 @@ namespace Apriori
             #endregion
         }
         #endregion
-        public bool CheckRegulationExist(string[] items,string key)
-        {
-            int itemsCount = items.Length;
-            
-            foreach (KeyValuePair<string[],string> item in Regulations)
-            {
-                bool isExist = true;
-                if (item.Key.Length!=itemsCount || key!=item.Value)
-                {
-                    continue;
-                }
-                bool isDifferent = false;
-                for (int i = 0; i < itemsCount; i++)
-                {
-                    if (item.Key[i]!=items[i])
-                    {
-                        isDifferent = true;
-                    }
-                    if (isDifferent)
-                    {
-                        isExist = false;
-                        break;
-                    }
-                }
-                if (isExist)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
 
         #region ============>测试Func
         /// <summary>
-        /// 
+        /// 开始测试
         /// </summary>
         /// <param name="testData">要测试的数据</param>
         /// <returns>测试结果</returns>
@@ -266,8 +231,8 @@ namespace Apriori
             string currentLine = testData;
 
             #region 判断块
-            Dictionary<string, double> testNote = new Dictionary<string, double>();        //用来记录规则判断的结果
-            foreach (KeyValuePair<string[], string> regs in Regulations)          //读取行后，开始与每一条数据进行比对
+            Dictionary<string, double> testNote = new Dictionary<string, double>();  //用来记录规则判断的结果
+            foreach (KeyValuePair<string[], string> regs in Regulations)             //读取行后，开始与每一条数据进行比对
             {
                 int weight = 0;                                                      //权值，为规则项数
                 bool isContain = true;
@@ -313,12 +278,12 @@ namespace Apriori
         public void LoadData(string url)
         {
             //Console.WriteLine("-----------Loading Data----------");
-            
+
             //RawData.Add(new List<string>(new string[5] { "8", "3", "6", "4", "0" }));
             //RawData.Add(new List<string>(new string[5] { "2", "5", "3", "4", "-1" }));
             //RawData.Add(new List<string>(new string[5] { "6", "3", "5", "2", "-1" }));
             //RawData.Add(new List<string>(new string[5] { "5", "2", "4", "1", "0" }));
-            
+
 
             StreamReader FileLoader = new StreamReader(url);
             while (true)
